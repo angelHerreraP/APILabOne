@@ -96,14 +96,17 @@ app.post('/api/reviews', (req, res) => {
     return res.status(400).json({ error: 'content inválido o faltante' });
   }
   productId = Number(productId);
-  const query = `INSERT INTO reviews (product_id, content) VALUES (${productId}, '${content}')`;
-  db.run(query, function (err) {
-    if (err) return res.status(500).json({ error: 'Database error', details: err.message });
-    db.get(`SELECT * FROM reviews WHERE id = ${this.lastID}`, (err2, review) => {
-      if (err2) res.json({ success: true, id: this.lastID });
-      else res.json({ success: true, review });
-    });
-  });
+  db.run(
+    `INSERT INTO reviews (product_id, content) VALUES (?, ?)`,
+    [productId, content],
+    function (err) {
+      if (err) return res.status(500).json({ error: 'Database error', details: err.message });
+      db.get(`SELECT * FROM reviews WHERE id = ${this.lastID}`, (err2, review) => {
+        if (err2) res.json({ success: true, id: this.lastID });
+        else res.json({ success: true, review });
+      });
+    }
+  );
 });
 
 // Get reviews for a product (vulnerable to XSS)
